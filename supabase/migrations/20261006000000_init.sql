@@ -1,4 +1,4 @@
--- Run once in the Supabase SQL editor (or supabase db push).
+-- Applied to the live project on 2026-10-06. For a fresh project, run this file, then the ones after it, in order.
 -- Dates like "today" and "overdue" follow Denver time, not UTC.
 alter database postgres set timezone to 'America/Denver';
 
