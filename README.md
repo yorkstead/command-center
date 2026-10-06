@@ -6,7 +6,7 @@ Stack: Next.js 16 (App Router), Tailwind 4, Lucide, Supabase (Postgres, Auth, Re
 
 ## First-time setup
 
-1. **Database.** In the Supabase dashboard, open SQL Editor, paste all of `supabase/migrations/20261006000000_init.sql`, and run it.
+1. **Database.** Already done for the live project. For a fresh one, run each file in `supabase/migrations/` in order in the SQL Editor.
 2. **Sign-in settings.** Authentication > Sign In / Providers: leave Email on and turn **off** "Allow new users to sign up". Authentication > URL Configuration: set Site URL to `https://cal.yorkstead.com` and add these redirect URLs: `https://cal.yorkstead.com/auth/callback`, `http://localhost:3000/auth/callback`.
 3. **People.** Authentication > Users > Invite user, once for Brandon and once for Eric. Then edit the emails in `supabase/team.sql` and run it in the SQL Editor. Anyone signed in without a row in `profiles` sees nothing.
 4. **Keys.** Copy `.env.example` to `.env.local` and fill in the values from Project Settings > API. Add the same two variables in Vercel.
