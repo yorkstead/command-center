@@ -22,6 +22,10 @@ export async function sendMagicLink(_prev: SignInState, form: FormData): Promise
   });
 
   // Same message either way, so the form doesn't reveal who has an account.
+  if (error?.status === 429) {
+    // Supabase caps how many sign-in emails go out per hour.
+    return { status: "error", message: "Too many sign-in emails were sent recently. Wait a few minutes and try again." };
+  }
   if (error && error.status !== 400 && error.status !== 422) {
     return { status: "error", message: "Couldn't send the link. Try again in a minute." };
   }
