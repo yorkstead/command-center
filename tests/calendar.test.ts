@@ -42,9 +42,12 @@ describe("toExternalEvent", () => {
     expect(toExternalEvent({ id: "abc", status: "cancelled" }, now)).toEqual({ externalId: "google:abc", cancelled: true });
   });
 
-  test("skips all-day events and events past the horizon", () => {
-    expect(toExternalEvent({ id: "a", start: { date: "2026-10-07" } }, now)).toBeNull();
-    expect(toExternalEvent({ id: "b", start: { dateTime: "2028-01-01T09:00:00Z" } }, now)).toBeNull();
+  test("all-day events and events past the horizon retire any meeting we imported", () => {
+    expect(toExternalEvent({ id: "a", start: { date: "2026-10-07" } }, now)).toEqual({ externalId: "google:a", cancelled: true });
+    expect(toExternalEvent({ id: "b", start: { dateTime: "2028-01-01T09:00:00Z" } }, now)).toEqual({
+      externalId: "google:b",
+      cancelled: true,
+    });
   });
 
   test("drops an end that isn't after the start, since the database rejects it", () => {

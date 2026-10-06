@@ -29,20 +29,30 @@ export type ExternalEvent =
 /** How far ahead we store events. Repeating meetings with no end date stop here. */
 export const HORIZON_DAYS = 365;
 
+/** The furthest-out start time we store. */
+export function horizon(now = new Date()) {
+  return new Date(now.getTime() + HORIZON_DAYS * 86_400_000);
+}
+
 export function googleExternalId(eventId: string) {
   return `google:${eventId}`;
 }
 
-/** null means "not a meeting, skip it". */
-export function toExternalEvent(e: GoogleEvent, now = new Date()): ExternalEvent | null {
+/**
+ * An event we don't keep as a meeting (all-day, or past the horizon) comes back
+ * as cancelled: that's a no-op for events we never imported, and retires the
+ * meeting if a timed event we did import was turned into one of those.
+ */
+export function toExternalEvent(e: GoogleEvent, now = new Date()): ExternalEvent {
   const externalId = googleExternalId(e.id);
-  if (e.status === "cancelled") return { externalId, cancelled: true };
+  const skip = { externalId, cancelled: true } as const;
+  if (e.status === "cancelled") return skip;
   // All-day events are holds and days off, not meetings.
-  if (!e.start?.dateTime) return null;
+  if (!e.start?.dateTime) return skip;
 
   const start = new Date(e.start.dateTime);
-  if (Number.isNaN(start.getTime())) return null;
-  if (start.getTime() > now.getTime() + HORIZON_DAYS * 86_400_000) return null;
+  if (Number.isNaN(start.getTime())) return skip;
+  if (start.getTime() > horizon(now).getTime()) return skip;
 
   const end = e.end?.dateTime ? new Date(e.end.dateTime) : null;
   return {

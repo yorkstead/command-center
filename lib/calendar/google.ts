@@ -2,7 +2,7 @@ import "server-only";
 import { randomBytes, randomUUID } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { decrypt } from "./crypto";
-import { toExternalEvent, type GoogleEvent } from "./events";
+import { horizon, toExternalEvent, type GoogleEvent } from "./events";
 import { upsertMeetingFromEvent } from "./upsert-meeting";
 
 // Plain fetch against four Google endpoints; the googleapis package is large
@@ -109,6 +109,7 @@ export async function syncConnection(connectionId: string, { forceFull = false }
     const p = new URLSearchParams({ singleEvents: "true", maxResults: "250" });
     if (full) {
       p.set("timeMin", new Date(Date.now() - 30 * 86_400_000).toISOString());
+      p.set("timeMax", horizon().toISOString()); // don't download endless repeats we'd skip anyway
       p.set("showDeleted", "true"); // so a deletion we missed still marks the meeting cancelled
     } else p.set("syncToken", conn.sync_token!);
     if (pageToken) p.set("pageToken", pageToken);
@@ -122,8 +123,7 @@ export async function syncConnection(connectionId: string, { forceFull = false }
 
     const body = (await res.json()) as { items?: GoogleEvent[]; nextPageToken?: string; nextSyncToken?: string };
     for (const item of body.items ?? []) {
-      const ev = toExternalEvent(item);
-      if (ev) await upsertMeetingFromEvent(db, ev, conn.profile_id);
+      await upsertMeetingFromEvent(db, toExternalEvent(item), conn.profile_id);
     }
     pageToken = body.nextPageToken;
     nextSyncToken = body.nextSyncToken;
