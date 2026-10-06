@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { LoginForm } from "./login-form";
-import { LinkSession } from "./link-session";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -34,7 +33,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             {error === "link" ? (
               <p className="mt-4 text-sm text-destructive">That sign-in link expired or was already used. Send a new one.</p>
             ) : null}
-            <LinkSession />
             <LoginForm />
           </>
         )}
