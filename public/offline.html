@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline · Command Center</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f6f3ee; --fg: #262f38; --muted: #6b7682; --primary: #0084d9; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #141b22; --fg: #e6e9ee; --muted: #9aa4af; --primary: #36a9ea; } }
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: var(--bg); color: var(--fg);
+        font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 0 16px; }
+      main { max-width: 22rem; text-align: center; }
+      h1 { font-size: 1.125rem; margin: 0 0 0.5rem; }
+      p { margin: 0 0 1.25rem; color: var(--muted); }
+      button { font: inherit; font-weight: 600; border: 0; border-radius: 6px; padding: 0.5rem 1rem;
+        background: var(--primary); color: #fff; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You're offline</h1>
+      <p>Command Center needs a connection to show current tasks and meetings. It will load again once you're back online.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+    <script>window.addEventListener("online", () => location.reload());</script>
+  </body>
+</html>

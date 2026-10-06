@@ -4,6 +4,7 @@ import { signOut } from "@/lib/actions/auth";
 import { MobileTabBar, SidebarNav } from "@/components/shell/nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { RealtimeRefresh } from "@/components/shell/realtime-refresh";
+import { ServiceWorker } from "@/components/shell/service-worker";
 import { OwnerAvatar } from "@/components/ui/badge";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -55,6 +56,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="min-w-0 pb-20 md:pb-0">{children}</main>
       <MobileTabBar />
       <RealtimeRefresh />
+      <ServiceWorker />
     </div>
   );
 }
