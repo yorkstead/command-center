@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { addDays, dayBoundsUtc, daysBetween, dueLabel, isoDateInZone, zonedTimeToUtc } from "@/lib/dates";
+import { addDays, agoLabel, dayBoundsUtc, daysBetween, dueLabel, isoDateInZone, zonedTimeToUtc } from "@/lib/dates";
 
 describe("isoDateInZone", () => {
   test("uses Denver's date, not UTC's, in the evening", () => {
@@ -43,5 +43,15 @@ describe("due labels", () => {
   test("date math crosses month ends", () => {
     expect(addDays("2026-10-30", 3)).toBe("2026-11-02");
     expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
+  });
+});
+
+describe("agoLabel", () => {
+  const now = new Date("2026-10-06T12:00:00Z");
+  test("buckets", () => {
+    expect(agoLabel("2026-10-06T11:59:30Z", now)).toBe("just now");
+    expect(agoLabel("2026-10-06T11:55:00Z", now)).toBe("5 min ago");
+    expect(agoLabel("2026-10-06T09:00:00Z", now)).toBe("3 h ago");
+    expect(agoLabel("2026-10-05T11:00:00Z", now)).toBe("1 day ago");
   });
 });

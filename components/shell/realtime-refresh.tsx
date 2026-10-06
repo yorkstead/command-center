@@ -4,7 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const TABLES = ["tasks", "deals", "meetings", "agenda_items", "clients", "projects", "deal_touchpoints"];
+const TABLES = [
+  "tasks", "deals", "meetings", "meeting_attendees", "agenda_items", "clients", "contacts", "projects", "deal_touchpoints",
+];
 
 /**
  * When the other person changes something, re-render the current page from the
