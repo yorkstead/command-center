@@ -60,6 +60,18 @@ export interface Meeting {
   location: string | null;
   client_id: string | null;
   owner_id: string | null;
+  source: "app" | "google" | "calcom";
+  cancelled_at: string | null;
+}
+
+/** The columns of calendar_connections a signed-in person may read (the rest are server-only). */
+export interface CalendarStatus {
+  id: string;
+  account_email: string;
+  calendar_id: string;
+  last_synced_at: string | null;
+  last_error: string | null;
+  channel_expires_at: string | null;
 }
 
 export interface PipelineSummaryRow {

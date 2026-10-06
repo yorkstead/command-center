@@ -2,7 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/auth/"];
+// Google's calendar pings, Cal.com bookings and the nightly job aren't signed in;
+// each of those routes checks its own shared secret instead.
+const PUBLIC_PATHS = ["/login", "/auth/", "/api/calendar/google/webhook", "/api/calendar/calcom/webhook", "/api/cron/"];
 
 // Keeps the Supabase session cookie fresh and sends signed-out visitors to /login.
 // The real access check (is this person on the team?) happens in the app layout

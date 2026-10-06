@@ -29,4 +29,18 @@ bun run typecheck
 - `lib/auth.ts` `requireMember()` is called by every page and Server Action. It returns the Supabase client, the signed-in person and the team.
 - `lib/actions/` holds the Server Actions (all writes). Each validates input with Zod (`lib/validation.ts`) and writes as the signed-in user, so the database's own rules still apply.
 - `components/shell/realtime-refresh.tsx` listens for changes from the other person and refreshes the page.
+- `lib/calendar/` is the Google Calendar sync (below).
 - Dates: "today" and "overdue" are Denver time (`lib/dates.ts`, and the database timezone is set to America/Denver).
+
+## Calendar sync
+
+One way: the shared **Yorkstead Meetings** Google calendar flows into Meetings. The app never writes to Google.
+
+- Google owns title, time, location and attendees. Notes, agenda, follow-ups, and any client or owner set by hand stay in the app and are never overwritten.
+- A cancelled or deleted event marks the meeting cancelled (struck through on Meetings, hidden on Today). Nothing is deleted.
+- Attendee emails are matched to the team and to contacts; the first matching contact's client becomes the meeting's client.
+- Google pings `/api/calendar/google/webhook` within seconds of a change. A daily job (`vercel.json`, 11:00 UTC) catches anything missed, renews the ping subscription before Google's one-week expiry, and once a week re-reads the whole calendar.
+- Connect, reconnect and "Sync now" are on the Meetings page. The refresh token is stored encrypted (`TOKEN_ENCRYPTION_KEY`); the browser can read only the status columns of `calendar_connections`.
+- Locally, Google can't reach localhost, so set `APP_URL=http://localhost:3000` and use "Sync now".
+
+Optional: point a Cal.com "Booking Created" webhook at `/api/calendar/calcom/webhook` with `CALCOM_WEBHOOK_SECRET`, and a stranger who books becomes a prospect client and contact. The meeting itself still arrives through Google.

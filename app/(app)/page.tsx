@@ -27,7 +27,13 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
     .order("priority", { ascending: true });
   if (owner.ownerId) taskQuery = taskQuery.eq("owner_id", owner.ownerId);
 
-  let meetingQuery = supabase.from("meetings").select("*").gte("starts_at", start).lt("starts_at", end).order("starts_at");
+  let meetingQuery = supabase
+    .from("meetings")
+    .select("*")
+    .gte("starts_at", start)
+    .lt("starts_at", end)
+    .is("cancelled_at", null)
+    .order("starts_at");
   if (owner.ownerId) meetingQuery = meetingQuery.eq("owner_id", owner.ownerId);
 
   let dealQuery = supabase.from("deals").select("*").not("stage", "in", "(won,lost)");
