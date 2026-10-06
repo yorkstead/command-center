@@ -39,6 +39,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <p className="text-sm font-semibold">Command Center</p>
         <div className="flex items-center gap-1">
           <ThemeToggle />
+          <form action={signOut}>
+            <button
+              type="submit"
+              aria-label="Sign out"
+              className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <LogOut className="size-4" aria-hidden />
+            </button>
+          </form>
           <OwnerAvatar initials={me.initials} title={me.display_name} />
         </div>
       </header>

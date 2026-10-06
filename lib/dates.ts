@@ -39,12 +39,24 @@ export function timeLabel(iso: string): string {
 
 /** Start and end of a team-local day as UTC ISO strings, for timestamp range queries. */
 export function dayBoundsUtc(isoDate: string, timeZone = TEAM_TIME_ZONE): { start: string; end: string } {
-  return { start: zonedMidnightUtc(isoDate, timeZone), end: zonedMidnightUtc(addDays(isoDate, 1), timeZone) };
+  return { start: zonedTimeToUtc(isoDate, "00:00", timeZone), end: zonedTimeToUtc(addDays(isoDate, 1), "00:00", timeZone) };
 }
 
-function zonedMidnightUtc(isoDate: string, timeZone: string): string {
-  // Guess midnight UTC, measure the zone's offset at that moment, then correct.
-  const guess = new Date(`${isoDate}T00:00:00Z`);
+/**
+ * A wall-clock date and time in the team's zone ("2026-03-08", "09:00") as a UTC ISO string.
+ * Uses the zone's offset at that moment, so days when clocks change come out right.
+ */
+export function zonedTimeToUtc(isoDate: string, time: string, timeZone = TEAM_TIME_ZONE): string {
+  const wallAsUtc = Date.parse(`${isoDate}T${time}:00Z`);
+  // First guess uses the offset at the wall time read as UTC; the second pass
+  // re-measures at the corrected instant, which settles across a clock change.
+  let instant = wallAsUtc - zoneOffsetMs(wallAsUtc, timeZone);
+  instant = wallAsUtc - zoneOffsetMs(instant, timeZone);
+  return new Date(instant).toISOString();
+}
+
+/** How far the zone's clock is ahead of UTC at the given instant, in ms (negative for Denver). */
+function zoneOffsetMs(instant: number, timeZone: string): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hourCycle: "h23",
@@ -53,9 +65,8 @@ function zonedMidnightUtc(isoDate: string, timeZone: string): string {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-  }).formatToParts(guess);
+  }).formatToParts(new Date(instant));
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  const asIfUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"));
-  const offsetMs = asIfUtc - guess.getTime();
-  return new Date(guess.getTime() - offsetMs).toISOString();
+  const wall = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"));
+  return wall - Math.floor(instant / 60_000) * 60_000;
 }

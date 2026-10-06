@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireMember } from "@/lib/auth";
-import { dayBoundsUtc } from "@/lib/dates";
+import { zonedTimeToUtc } from "@/lib/dates";
 import { firstError, formToObject, newMeetingSchema, type ActionResult } from "@/lib/validation";
 
 export async function createMeeting(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
@@ -12,8 +12,7 @@ export async function createMeeting(_prev: ActionResult | null, form: FormData):
   const { title, date, time, duration_minutes, client_id, owner_id, location } = parsed.data;
 
   // The form's date and time are Denver time.
-  const [h, m] = time.split(":").map(Number);
-  const startsAt = new Date(Date.parse(dayBoundsUtc(date).start) + (h * 60 + m) * 60_000);
+  const startsAt = new Date(zonedTimeToUtc(date, time));
   const endsAt = duration_minutes > 0 ? new Date(startsAt.getTime() + duration_minutes * 60_000) : null;
 
   const { error } = await supabase.from("meetings").insert({

@@ -33,18 +33,18 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
   let dealQuery = supabase.from("deals").select("*").not("stage", "in", "(won,lost)");
   if (owner.ownerId) dealQuery = dealQuery.eq("owner_id", owner.ownerId);
 
-  const [tasksRes, meetingsRes, dealsRes, summaryRes, clientsRes] = await Promise.all([
+  const [tasksRes, meetingsRes, dealsRes, clientsRes] = await Promise.all([
     taskQuery,
     meetingQuery,
     dealQuery,
-    supabase.from("v_pipeline_summary").select("*"),
     supabase.from("clients").select("id, name"),
   ]);
 
   const tasks = (tasksRes.data ?? []) as Task[];
   const meetings = (meetingsRes.data ?? []) as Meeting[];
   const deals = (dealsRes.data ?? []) as Deal[];
-  const summary = (summaryRes.data ?? []) as PipelineSummaryRow[];
+  // Built from the same owner-filtered deals as the rest of the page.
+  const summary = summarizeByStage(deals);
   const clientName = new Map(((clientsRes.data ?? []) as Pick<Client, "id" | "name">[]).map((c) => [c.id, c.name]));
 
   const overdue = tasks.filter((t) => t.due_date && t.due_date < today);
@@ -133,6 +133,17 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
       </div>
     </>
   );
+}
+
+function summarizeByStage(deals: Deal[]): PipelineSummaryRow[] {
+  const rows = new Map<Deal["stage"], PipelineSummaryRow>();
+  for (const d of deals) {
+    const row = rows.get(d.stage) ?? { stage: d.stage, deal_count: 0, total_cents: 0, oldest_touch: null };
+    row.deal_count += 1;
+    row.total_cents += d.value_cents ?? 0;
+    rows.set(d.stage, row);
+  }
+  return [...rows.values()];
 }
 
 function PipelineStrip({ summary }: { summary: PipelineSummaryRow[] }) {

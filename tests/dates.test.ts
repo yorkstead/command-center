@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { addDays, dayBoundsUtc, daysBetween, dueLabel, isoDateInZone } from "@/lib/dates";
+import { addDays, dayBoundsUtc, daysBetween, dueLabel, isoDateInZone, zonedTimeToUtc } from "@/lib/dates";
 
 describe("isoDateInZone", () => {
   test("uses Denver's date, not UTC's, in the evening", () => {
@@ -14,6 +14,21 @@ describe("dayBoundsUtc", () => {
   });
   test("midnight Denver in standard time is 07:00 UTC", () => {
     expect(dayBoundsUtc("2026-12-01").start).toBe("2026-12-01T07:00:00.000Z");
+  });
+});
+
+describe("zonedTimeToUtc", () => {
+  test("ordinary days", () => {
+    expect(zonedTimeToUtc("2026-10-06", "09:00")).toBe("2026-10-06T15:00:00.000Z");
+    expect(zonedTimeToUtc("2026-12-01", "09:00")).toBe("2026-12-01T16:00:00.000Z");
+  });
+  test("the day clocks spring forward (Mar 8, 2026)", () => {
+    expect(zonedTimeToUtc("2026-03-08", "00:00")).toBe("2026-03-08T07:00:00.000Z");
+    expect(zonedTimeToUtc("2026-03-08", "09:00")).toBe("2026-03-08T15:00:00.000Z");
+  });
+  test("the day clocks fall back (Nov 1, 2026)", () => {
+    expect(zonedTimeToUtc("2026-11-01", "00:00")).toBe("2026-11-01T06:00:00.000Z");
+    expect(zonedTimeToUtc("2026-11-01", "09:00")).toBe("2026-11-01T16:00:00.000Z");
   });
 });
 
